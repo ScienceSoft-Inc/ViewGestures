@@ -28,8 +28,6 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
                 winControl = new Canvas();
 
                 // note that a background is needed for the gestures to fire
-                //winControl.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 0, 0));
-
                 winControl.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(
                     (byte)e.NewElement.BackgroundColor.A, 
                     (byte)e.NewElement.BackgroundColor.R, 
@@ -103,15 +101,13 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
             var upDownMinDelta = this.ActualHeight * deltaPercentage;
             var leftRightMinDelta = this.ActualWidth * deltaPercentage;
 
-            //System.Diagnostics.Debug.WriteLine("X: {0}, Y: {1}", delX, delY);
-
             if (absX > absY && absX > leftRightMinDelta)
             {
                 if (delX < 0)
                     this.Element.OnSwipeLeft();
                 else
                     this.Element.OnSwipeRight();
-                e.Complete();
+                //e.Complete();
             }
             else if (absY > absX && absY > upDownMinDelta)
             {
@@ -119,7 +115,7 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
                     this.Element.OnSwipeUp();
                 else
                     this.Element.OnSwipeDown();
-                e.Complete();
+                //e.Complete();
             }
         }
     }
