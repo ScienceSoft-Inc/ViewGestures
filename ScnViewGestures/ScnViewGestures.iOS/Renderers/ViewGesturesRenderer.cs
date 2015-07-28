@@ -121,6 +121,22 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                     OnTouchesEnded();
             }
 
+            public override void TouchesMoved(NSSet touches, UIEvent evt)
+            {
+                base.TouchesMoved(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
+            public override void TouchesCancelled(NSSet touches, UIEvent evt)
+            {
+                base.TouchesCancelled(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
             public Action OnTouchesBegan;
             public Action OnTouchesEnded;
         }
@@ -147,6 +163,22 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                     OnTouchesEnded();
             }
 
+            public override void TouchesMoved(NSSet touches, UIEvent evt)
+            {
+                base.TouchesMoved(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
+            public override void TouchesCancelled(NSSet touches, UIEvent evt)
+            {
+                base.TouchesCancelled(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
             public Action OnTouchesBegan;
             public Action OnTouchesEnded;
         }
@@ -168,6 +200,14 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             public override void TouchesEnded(NSSet touches, UIEvent evt)
             {
                 base.TouchesEnded(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
+            public override void TouchesCancelled(NSSet touches, UIEvent evt)
+            {
+                base.TouchesCancelled(touches, evt);
 
                 if (OnTouchesEnded != null)
                     OnTouchesEnded();

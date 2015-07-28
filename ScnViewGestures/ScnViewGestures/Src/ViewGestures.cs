@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace ScnViewGestures.Plugin.Forms
@@ -133,13 +134,13 @@ namespace ScnViewGestures.Plugin.Forms
 
         async void Gesture_PressBegan(object sender, EventArgs e)
         {
-            await this.ScaleTo(1 + (DeformationValue / 100), 100, Easing.CubicOut);
+            if (DeformationValue != 0)
+                await this.ScaleTo(1 + (DeformationValue / 100), 100, Easing.CubicOut);
         }
 
         async void Gesture_PressEnded(object sender, EventArgs e)
         {
             await this.ScaleTo(1, 100, Easing.CubicOut);
         }
-
     }
 }
