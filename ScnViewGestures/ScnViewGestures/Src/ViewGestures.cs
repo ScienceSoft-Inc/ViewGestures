@@ -54,13 +54,23 @@ namespace ScnViewGestures.Plugin.Forms
         }
         #endregion
 
+
         #region Tap gesture
+        static object tapLocker = new object();
+        private bool _isTaped = false;
+
         public event EventHandler Tap;
         public void OnTap()
         {
-            if (Tap != null)
-                Tap(Content, EventArgs.Empty);
-            OnTouch(GestureType.gtTap);
+            lock (tapLocker) 
+                if (!_isTaped)
+                {
+                    _isTaped = true;
+
+                    if (Tap != null)
+                        Tap(Content, EventArgs.Empty);
+                    OnTouch(GestureType.gtTap);
+                }
         }
         #endregion
 
@@ -134,6 +144,9 @@ namespace ScnViewGestures.Plugin.Forms
 
         async void Gesture_PressBegan(object sender, EventArgs e)
         {
+            lock (tapLocker)
+                _isTaped = false;
+
             if (DeformationValue != 0)
                 await this.ScaleTo(1 + (DeformationValue / 100), 100, Easing.CubicOut);
         }

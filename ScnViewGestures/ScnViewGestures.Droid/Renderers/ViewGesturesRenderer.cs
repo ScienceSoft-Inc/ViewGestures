@@ -20,7 +20,11 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
 {
     public class ViewGesturesRenderer : ViewRenderer
     {
-        public static void Init() { }
+        // Used for registration with dependency service
+        public async static void Init()
+        {
+            var temp = DateTime.Now;
+        }
 
         private readonly GestureListener _listener;
         private readonly GestureDetector _detector;
@@ -143,6 +147,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
 
             private static int SWIPE_THRESHOLD = 100;
             private static int SWIPE_VELOCITY_THRESHOLD = 100;
+            private static int TAP_THRESHOLD = 20;
 
             public override bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
             {
@@ -153,6 +158,12 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 float diffY = e2.GetY() - e1.GetY();
                 float diffX = e2.GetX() - e1.GetX();
 
+                if (Math.Abs(diffX) < TAP_THRESHOLD && Math.Abs(diffX) < TAP_THRESHOLD)
+                {
+                    if (OnTap != null)
+                        OnTap();
+                }
+                else
                 if (Math.Abs(diffX) > Math.Abs(diffY))
                 {
                     if (Math.Abs(diffX) > SWIPE_THRESHOLD && Math.Abs(velocityX) > SWIPE_VELOCITY_THRESHOLD)
@@ -194,9 +205,6 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #if DEBUG
                 Console.WriteLine("OnScroll");
                 #endif
-
-                //if (OnSwipe != null)
-                //    OnSwipe();
 
                 if (OnTapEnded != null)
                     OnTapEnded();

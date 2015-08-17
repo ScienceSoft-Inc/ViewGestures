@@ -16,7 +16,11 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
 {
     public class ViewGesturesRenderer : ViewRenderer
     {
-        public static void Init() { }
+        // Used for registration with dependency service
+        public async static void Init()
+        {
+            var temp = DateTime.Now;
+        }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Xamarin.Forms.View> e)
         {
