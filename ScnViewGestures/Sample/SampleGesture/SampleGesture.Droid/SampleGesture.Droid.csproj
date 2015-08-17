@@ -53,14 +53,6 @@
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="ScnViewGestures, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\ScnViewGestures.Forms.1.0.16\lib\MonoAndroid10\ScnViewGestures.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ScnViewGestures.Droid, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\ScnViewGestures.Forms.1.0.16\lib\MonoAndroid10\ScnViewGestures.Droid.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -101,6 +93,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\AndroidManifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ScnViewGestures.Droid\ScnViewGestures.Droid.csproj">
+      <Project>{61a8134a-6309-4a57-9f64-9fdfeb7220c9}</Project>
+      <Name>ScnViewGestures.Droid</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ScnViewGestures\ScnViewGestures.csproj">
+      <Project>{67f9d3a8-f71e-4428-913f-c37ae82cdb24}</Project>
+      <Name>ScnViewGestures</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\SampleGesture\SampleGesture.projitems" Label="Shared" Condition="Exists('..\SampleGesture\SampleGesture.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

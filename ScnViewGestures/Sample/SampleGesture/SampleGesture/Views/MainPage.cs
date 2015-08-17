@@ -78,6 +78,7 @@ namespace SampleGesture.Views
             };
             touchViewGestures.TouchBegan += (s, e) => { boxTouch.BackgroundColor = Color.Red; };
             touchViewGestures.TouchEnded += (s, e) => { boxTouch.BackgroundColor = Color.Green; };
+            touchViewGestures.LongTap += (s, e) => { boxTouch.BackgroundColor = Color.Green; };
             #endregion
 
             Content = new StackLayout
