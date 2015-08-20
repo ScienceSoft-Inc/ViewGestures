@@ -35,14 +35,14 @@ namespace SampleGesture.Views
             #region Gesture 2
             Label titleSwipe = new Label
             {
-                Text = "Swipe in box:",
+                Text = "Swipe or touch this box:",
             };
             
             BoxView boxSwipe = new BoxView
             {
                 BackgroundColor = Color.Yellow,
-                WidthRequest = 200,
-                HeightRequest = 200,
+                WidthRequest = 150,
+                HeightRequest = 150,
             };
 
             var swipeViewGestures = new ViewGestures
@@ -55,30 +55,36 @@ namespace SampleGesture.Views
             swipeViewGestures.SwipeDown += (s, e) => { this.DisplayAlert("Swipe", "DOWN", "OK"); };
             swipeViewGestures.SwipeLeft += (s, e) => { this.DisplayAlert("Swipe", "LEFT", "OK"); };
             swipeViewGestures.SwipeRight += (s, e) => { this.DisplayAlert("Swipe", "RIGHT", "OK"); };
+
+            swipeViewGestures.TouchBegan += (s, e) => { boxSwipe.BackgroundColor = Color.Red; };
+            swipeViewGestures.TouchEnded += (s, e) => { boxSwipe.BackgroundColor = Color.Yellow; };
+
             #endregion
 
             #region Gesture 3
-            Label titleTouch = new Label
+            Label titleDrag = new Label
             {
                 Text = "Touch box:",
             };
 
-            BoxView boxTouch = new BoxView
+            BoxView boxDrag = new BoxView
             {
                 BackgroundColor = Color.Green,
-                WidthRequest = 200,
-                HeightRequest = 200,
+                WidthRequest = 100,
+                HeightRequest = 100,
             };
 
-            var touchViewGestures = new ViewGestures
+            var dragViewGestures = new ViewGestures
             {
                 BackgroundColor = Color.Transparent,
-                Content = boxTouch,
+                Content = boxDrag,
                 HorizontalOptions = LayoutOptions.Center,
             };
-            touchViewGestures.TouchBegan += (s, e) => { boxTouch.BackgroundColor = Color.Red; };
-            touchViewGestures.TouchEnded += (s, e) => { boxTouch.BackgroundColor = Color.Green; };
-            touchViewGestures.LongTap += (s, e) => { boxTouch.BackgroundColor = Color.Green; };
+            dragViewGestures.Drag += (s, e) =>
+            {
+                dragViewGestures.TranslationX += e.DistanceX;
+                dragViewGestures.TranslationY += e.DistanceY;
+            };
             #endregion
 
             Content = new StackLayout
@@ -93,8 +99,8 @@ namespace SampleGesture.Views
                     titleSwipe,
                     swipeViewGestures,
 
-                    titleTouch,
-                    touchViewGestures
+                    titleDrag,
+                    dragViewGestures,
                 }
             };
         }

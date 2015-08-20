@@ -46,9 +46,9 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 this.GenericMotion -= HandleGenericMotion;
                 this.Touch -= HandleTouch;
 
-                _listener.OnDownPress = null;
                 _listener.OnTap = null;
-                _listener.OnTapEnded = null;
+                _listener.OnTouchBegan = null;
+                _listener.OnTouchEnded = null;
                 _listener.OnLongTap = null;
 
                 _listener.OnSwipeLeft = null;
@@ -62,15 +62,18 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 this.GenericMotion += HandleGenericMotion;
                 this.Touch += HandleTouch;
 
-                _listener.OnDownPress = (() => viewGestures.OnTouchBegan());
                 _listener.OnTap = (() => viewGestures.OnTap());
-                _listener.OnTapEnded = (() => viewGestures.OnTouchEnded());
                 _listener.OnLongTap = (() => viewGestures.OnLongTap());
+
+                _listener.OnTouchBegan = (() => viewGestures.OnTouchBegan());
+                _listener.OnTouchEnded = (() => viewGestures.OnTouchEnded());
 
                 _listener.OnSwipeLeft = (() => viewGestures.OnSwipeLeft());
                 _listener.OnSwipeRight = (() => viewGestures.OnSwipeRight());
                 _listener.OnSwipeUp = (() => viewGestures.OnSwipeUp());
                 _listener.OnSwipeDown = (() => viewGestures.OnSwipeDown());
+
+                _listener.OnDrag = ((x, y) => viewGestures.OnDrag(x, y));
             }
         }
 
@@ -87,16 +90,42 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
 
         public class GestureListener : GestureDetector.SimpleOnGestureListener
         {
-            public Action OnDownPress;
             public Action OnTap;
-            public Action OnTapEnded;
             public Action OnLongTap;
 
+            public Action OnTouchBegan;
+            public Action OnTouchEnded;
 
             public Action OnSwipeLeft;
             public Action OnSwipeRight;
             public Action OnSwipeUp;
             public Action OnSwipeDown;
+
+            public Action<float, float> OnDrag;
+
+            public override bool OnDown(MotionEvent e)
+            {
+                #if DEBUG
+                Console.WriteLine("OnDown");
+                #endif
+
+                if (OnTouchBegan != null)
+                    OnTouchBegan();
+
+                return base.OnDown(e);
+            }
+
+            public override void OnShowPress(MotionEvent e)
+            {
+                #if DEBUG
+                Console.WriteLine("OnShowPress");
+                #endif
+
+                if (OnTouchBegan != null)
+                    OnTouchBegan();
+
+                base.OnShowPress(e);
+            }
 
             public override void OnLongPress(MotionEvent e)
             {
@@ -140,16 +169,16 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 return base.OnSingleTapUp(e);
             }
 
-            public override bool OnDown(MotionEvent e)
+            public override bool OnSingleTapConfirmed(MotionEvent e)
             {
                 #if DEBUG
-                Console.WriteLine("OnDown");
+                Console.WriteLine("OnSingleTapConfirmed");
                 #endif
 
-                if (OnDownPress != null)
-                    OnDownPress();
+                if (OnTouchEnded != null)
+                    OnTouchEnded();
 
-                return base.OnDown(e);
+                return base.OnSingleTapConfirmed(e);
             }
 
             private static int SWIPE_THRESHOLD = 100;
@@ -201,11 +230,13 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                     }
                 }
 
-                if (OnTapEnded != null)
-                    OnTapEnded();
+                if (OnTouchEnded != null)
+                    OnTouchEnded();
 
                 return true;
             }
+
+            private static int SCROLL_THRESHOLD = 2;
 
             public override bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
             {
@@ -213,31 +244,16 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 Console.WriteLine("OnScroll");
                 #endif
 
-                if (OnTapEnded != null)
-                    OnTapEnded();
+                float diffX = e2.GetX() - e1.GetX();
+                float diffY = e2.GetY() - e1.GetY();
+
+                if (OnDrag != null)
+                    OnDrag(diffX / SCROLL_THRESHOLD, diffY / SCROLL_THRESHOLD);
+                else
+                    if (OnTouchEnded != null)
+                        OnTouchEnded();
 
                 return base.OnScroll(e1, e2, distanceX, distanceY);
-            }
-
-            public override void OnShowPress(MotionEvent e)
-            {
-                #if DEBUG
-                Console.WriteLine("OnShowPress");
-                #endif
-
-                base.OnShowPress(e);
-            }
-
-            public override bool OnSingleTapConfirmed(MotionEvent e)
-            {
-                #if DEBUG
-                Console.WriteLine("OnSingleTapConfirmed");
-                #endif
-
-                if (OnTapEnded != null)
-                    OnTapEnded();
-
-                return base.OnSingleTapConfirmed(e);
             }
         }
      }

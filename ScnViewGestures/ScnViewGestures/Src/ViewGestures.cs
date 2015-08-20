@@ -10,9 +10,22 @@ namespace ScnViewGestures.Plugin.Forms
     {
         public ViewGestures()
         {
-            TouchBegan += Gesture_PressBegan;
-            TouchEnded += Gesture_PressEnded;
+            TouchBegan += PressBeganEffect;
+            TouchBegan += PressEndedEffectWithDelay;
+
+            TouchEnded += PressEndedEffect;
         }
+
+        #region TagProperty
+        public static readonly BindableProperty TagProperty =
+            BindableProperty.Create<ViewGestures, string>(p => p.Tag, "");
+
+        public string Tag
+        {
+            get { return (string)GetValue(TagProperty); }
+            set { SetValue(TagProperty, value); }
+        }
+        #endregion
 
         [Flags]
         public enum GestureType
@@ -53,7 +66,6 @@ namespace ScnViewGestures.Plugin.Forms
                 TouchEnded(Content, EventArgs.Empty);
         }
         #endregion
-
 
         #region Tap gesture
         static object tapLocker = new object();
@@ -135,6 +147,16 @@ namespace ScnViewGestures.Plugin.Forms
         }
         #endregion
 
+        #region Drag
+        public event EventHandler<DragEventArgs> Drag;
+        public void OnDrag(float distanceX, float distanceY)
+        {
+            if (Drag != null)
+                Drag(Content, new DragEventArgs(distanceX, distanceY));
+            OnTouch(GestureType.gtDrag);
+        }
+        #endregion
+
         private double deformationValue = 0.0;
         public double DeformationValue
         {
@@ -142,7 +164,7 @@ namespace ScnViewGestures.Plugin.Forms
             set { deformationValue = value; }
         }
 
-        async void Gesture_PressBegan(object sender, EventArgs e)
+        async void PressBeganEffect(object sender, EventArgs e)
         {
             lock (tapLocker)
                 _isTaped = false;
@@ -151,9 +173,27 @@ namespace ScnViewGestures.Plugin.Forms
                 await this.ScaleTo(1 + (DeformationValue / 100), 100, Easing.CubicOut);
         }
 
-        async void Gesture_PressEnded(object sender, EventArgs e)
+        async void PressEndedEffect(object sender, EventArgs e)
         {
             await this.ScaleTo(1, 100, Easing.CubicOut);
+        }
+
+        async void PressEndedEffectWithDelay(object sender, EventArgs e)
+        {
+            await Task.Delay(2000);
+            OnTouchEnded();
+        }
+    }
+
+    public class DragEventArgs : EventArgs
+    {
+        public readonly float DistanceX;
+        public readonly float DistanceY;
+
+        public DragEventArgs(float distanceX, float distanceY)
+        {
+            DistanceX = distanceX;
+            DistanceY = distanceY;
         }
     }
 }
