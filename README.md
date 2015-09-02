@@ -12,7 +12,8 @@ Supported gestures:
 - SwipeLeft;
 - SwipeRight;
 - SwipeUp;
-- SwipeDown.
+- SwipeDown;
+- Drag.
 
 Other gestures are in development.
 
