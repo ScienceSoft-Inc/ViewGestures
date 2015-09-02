@@ -64,7 +64,7 @@ namespace SampleGesture.Views
             #region Gesture 3
             Label titleDrag = new Label
             {
-                Text = "Touch box:",
+                Text = "Drag box:",
             };
 
             BoxView boxDrag = new BoxView

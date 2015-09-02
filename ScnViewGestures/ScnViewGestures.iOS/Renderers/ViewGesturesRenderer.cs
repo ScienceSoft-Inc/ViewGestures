@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using ScnViewGestures.Plugin.Forms;
 using ScnViewGestures.Plugin.Forms.iOS.Renderers;
+using CoreGraphics;
 
 [assembly: ExportRenderer(typeof(ViewGestures), typeof(ViewGesturesRenderer))]
 
@@ -71,6 +72,14 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
 
+            var dragGestureRecognizer = new DragGestureRecognizer()
+            {
+             
+                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
+                OnDrag = ((x, y) => viewGesture.OnDrag(x, y)),
+            };
+
             if (e.NewElement == null)
             {
                 if (tapGestureRecognizer != null)
@@ -90,6 +99,9 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                 
                 if (swipeDownGestureRecognizer != null)
                     this.RemoveGestureRecognizer(swipeDownGestureRecognizer);
+
+                if (dragGestureRecognizer != null)
+                    this.RemoveGestureRecognizer(dragGestureRecognizer);
             }
 
             if (e.OldElement == null)
@@ -100,6 +112,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                 this.AddGestureRecognizer(swipeRightGestureRecognizer);
                 this.AddGestureRecognizer(swipeUpGestureRecognizer);
                 this.AddGestureRecognizer(swipeDownGestureRecognizer);
+                this.AddGestureRecognizer(dragGestureRecognizer);
             }
         }
 
@@ -219,6 +232,50 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
 
             public Action OnTouchesBegan;
             public Action OnTouchesEnded;
+        }
+
+        class DragGestureRecognizer : UIPanGestureRecognizer
+        {
+            public override void TouchesBegan(NSSet touches, UIEvent evt)
+            {
+                base.TouchesBegan(touches, evt);
+
+                if (OnTouchesBegan != null)
+                    OnTouchesBegan();
+            }
+
+            public override void TouchesEnded(NSSet touches, UIEvent evt)
+            {
+                base.TouchesEnded(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
+            public override void TouchesMoved(NSSet touches, UIEvent evt)
+            {
+                base.TouchesMoved(touches, evt);
+                UITouch touch = touches.AnyObject as UITouch;
+
+                if (OnDrag != null && touch != null) 
+                {
+                    float offsetX = (float)touch.PreviousLocationInView (View).X - (float)touch.LocationInView (View).X;
+                    float offsetY = (float)touch.PreviousLocationInView (View).Y - (float)touch.LocationInView (View).Y;
+                    OnDrag (-offsetX, -offsetY);
+                }
+            }
+
+            public override void TouchesCancelled(NSSet touches, UIEvent evt)
+            {
+                base.TouchesCancelled(touches, evt);
+
+                if (OnTouchesEnded != null)
+                    OnTouchesEnded();
+            }
+
+            public Action OnTouchesBegan;
+            public Action OnTouchesEnded;
+            public Action<float, float> OnDrag;
         }
     }
 }
