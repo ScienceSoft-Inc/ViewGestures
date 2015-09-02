@@ -117,6 +117,8 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
                     this.Element.OnSwipeDown();
                 //e.Complete();
             }
+
+            this.Element.OnDrag((float)e.DeltaManipulation.Translation.X, (float)e.DeltaManipulation.Translation.Y);
         }
     }
 }
