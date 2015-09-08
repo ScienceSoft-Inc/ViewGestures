@@ -13,6 +13,7 @@ using Xamarin.Forms.Platform.Android;
 using Xamarin.Forms;
 using ScnViewGestures.Plugin.Forms;
 using ScnViewGestures.Plugin.Forms.Droid.Renderers;
+using System.Timers;
 
 [assembly: ExportRenderer(typeof(ViewGestures), typeof(ViewGesturesRenderer))]
 
@@ -62,7 +63,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 this.GenericMotion += HandleGenericMotion;
                 this.Touch += HandleTouch;
 
-                _listener.OnTap = (() => viewGestures.OnTap());
+                _listener.OnTap = ((x, y) => viewGestures.OnTap(x,y));
                 _listener.OnLongTap = (() => viewGestures.OnLongTap());
 
                 _listener.OnTouchBegan = (() => viewGestures.OnTouchBegan());
@@ -90,7 +91,23 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
 
         public class GestureListener : GestureDetector.SimpleOnGestureListener
         {
-            public Action OnTap;
+            public GestureListener()
+            {
+                tmrCallEnded = new Timer(1000);
+                tmrCallEnded.AutoReset = false;
+                tmrCallEnded.Elapsed += (s, e) =>
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                        {
+                            if (OnTouchEnded != null)
+                                OnTouchEnded();
+                        });
+                };
+            }
+            //OnTouchEnded doesn't call if longtime press to control or use swipe in scroll
+            private Timer tmrCallEnded;
+
+            public Action<double, double> OnTap;
             public Action OnLongTap;
 
             public Action OnTouchBegan;
@@ -101,7 +118,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
             public Action OnSwipeUp;
             public Action OnSwipeDown;
 
-            public Action<float, float> OnDrag;
+            public Action<double, double> OnDrag;
 
             public override bool OnDown(MotionEvent e)
             {
@@ -164,7 +181,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTap != null)
-                    OnTap();
+                    OnTap(e.GetX() / 2, e.GetY() / 2);
 
                 return base.OnSingleTapUp(e);
             }
@@ -197,7 +214,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 if (Math.Abs(diffX) < TAP_THRESHOLD && Math.Abs(diffX) < TAP_THRESHOLD)
                 {
                     if (OnTap != null)
-                        OnTap();
+                        OnTap(e2.GetX() / 2, e2.GetY() / 2);
                 }
                 else
                 if (Math.Abs(diffX) > Math.Abs(diffY))
@@ -248,7 +265,13 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 float diffY = e2.GetY() - e1.GetY();
 
                 if (OnDrag != null)
+                {
+                    //restart timer
+                    tmrCallEnded.Stop();
+                    tmrCallEnded.Start();
+
                     OnDrag(diffX / SCROLL_THRESHOLD, diffY / SCROLL_THRESHOLD);
+                }
                 else
                     if (OnTouchEnded != null)
                         OnTouchEnded();

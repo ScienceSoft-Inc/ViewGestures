@@ -80,7 +80,8 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
 
         void winControl_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            this.Element.OnTap();
+            var point = e.GetPosition(sender as Canvas );
+            this.Element.OnTap(point.X, point.Y);
         }
 
         double deltaPercentage = .25;

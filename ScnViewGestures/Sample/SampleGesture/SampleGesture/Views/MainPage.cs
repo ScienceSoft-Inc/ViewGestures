@@ -26,7 +26,8 @@ namespace SampleGesture.Views
             {
                 BackgroundColor = Color.Transparent,
                 Content = pressLabel,
-                DeformationValue = -5,
+                AnimationEffect = ViewGestures.AnimationType.atScaling,
+                AnimationScale = -5,
                 HorizontalOptions = LayoutOptions.Center,
             };
             tapViewGestures.Tap += (s, e) => { this.DisplayAlert("Tap", "Gesture finished", "OK"); };
@@ -50,15 +51,13 @@ namespace SampleGesture.Views
                 BackgroundColor = Color.Transparent,
                 Content = boxSwipe,
                 HorizontalOptions = LayoutOptions.Center,
+                AnimationEffect = ViewGestures.AnimationType.atFlashingTap,
+                AnimationColor = Color.FromRgba(192, 192, 192, 128),
             };
             swipeViewGestures.SwipeUp += (s, e) => { this.DisplayAlert("Swipe", "UP", "OK"); };
             swipeViewGestures.SwipeDown += (s, e) => { this.DisplayAlert("Swipe", "DOWN", "OK"); };
             swipeViewGestures.SwipeLeft += (s, e) => { this.DisplayAlert("Swipe", "LEFT", "OK"); };
             swipeViewGestures.SwipeRight += (s, e) => { this.DisplayAlert("Swipe", "RIGHT", "OK"); };
-
-            swipeViewGestures.TouchBegan += (s, e) => { boxSwipe.BackgroundColor = Color.Red; };
-            swipeViewGestures.TouchEnded += (s, e) => { boxSwipe.BackgroundColor = Color.Yellow; };
-
             #endregion
 
             #region Gesture 3
@@ -85,6 +84,9 @@ namespace SampleGesture.Views
                 dragViewGestures.TranslationX += e.DistanceX;
                 dragViewGestures.TranslationY += e.DistanceY;
             };
+
+            dragViewGestures.TouchBegan += (s, e) => { boxDrag.BackgroundColor = Color.Red; };
+            dragViewGestures.TouchEnded += (s, e) => { boxDrag.BackgroundColor = Color.Green; };
             #endregion
 
             Content = new StackLayout
