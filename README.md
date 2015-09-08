@@ -19,6 +19,7 @@ Furthermore, there is capability adding animation on view control.
 Supported animation effects:
 - scaling;
 - flashing.
+
 Also you can add own animation effect to events: TouchBegan and TouchEnded.
 
 How to use this plugin in Xamarin.Forms app
