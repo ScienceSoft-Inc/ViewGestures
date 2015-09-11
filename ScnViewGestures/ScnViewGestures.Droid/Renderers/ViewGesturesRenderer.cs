@@ -66,7 +66,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 _listener.OnTap = ((x, y) => viewGestures.OnTap(x,y));
                 _listener.OnLongTap = (() => viewGestures.OnLongTap());
 
-                _listener.OnTouchBegan = (() => viewGestures.OnTouchBegan());
+                _listener.OnTouchBegan = ((x, y) => viewGestures.OnTouchBegan(x, y));
                 _listener.OnTouchEnded = (() => viewGestures.OnTouchEnded());
 
                 _listener.OnSwipeLeft = (() => viewGestures.OnSwipeLeft());
@@ -110,7 +110,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
             public Action<double, double> OnTap;
             public Action OnLongTap;
 
-            public Action OnTouchBegan;
+            public Action<double, double> OnTouchBegan;
             public Action OnTouchEnded;
 
             public Action OnSwipeLeft;
@@ -127,7 +127,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTouchBegan != null)
-                    OnTouchBegan();
+                    OnTouchBegan(e.GetX() / 2, e.GetY() / 2);
 
                 return base.OnDown(e);
             }
@@ -139,7 +139,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTouchBegan != null)
-                    OnTouchBegan();
+                    OnTouchBegan(e.GetX() / 2, e.GetY() / 2);
 
                 base.OnShowPress(e);
             }

@@ -53,6 +53,7 @@ namespace SampleGesture.Views
                 HorizontalOptions = LayoutOptions.Center,
                 AnimationEffect = ViewGestures.AnimationType.atFlashingTap,
                 AnimationColor = Color.FromRgba(192, 192, 192, 128),
+                AnimationSpeed = 500,
             };
             swipeViewGestures.SwipeUp += (s, e) => { this.DisplayAlert("Swipe", "UP", "OK"); };
             swipeViewGestures.SwipeDown += (s, e) => { this.DisplayAlert("Swipe", "DOWN", "OK"); };

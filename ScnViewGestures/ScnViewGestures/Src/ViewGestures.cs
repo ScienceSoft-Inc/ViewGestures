@@ -10,7 +10,6 @@ namespace ScnViewGestures.Plugin.Forms
     {
         public ViewGestures()
         {
-            Tap += ViewGestures_AnimationTap;
             TouchBegan += PressBeganEffect;
             TouchBegan += PressEndedEffectWithDelay;
 
@@ -45,7 +44,7 @@ namespace ScnViewGestures.Plugin.Forms
         private View _mainContent;
         public new View Content
         {
-            get { return _mainContent; }
+            get { return base.Content; }
             set 
             {
                 _mainContent = value;
@@ -66,6 +65,12 @@ namespace ScnViewGestures.Plugin.Forms
                     new Rectangle(0.5f, 0f, AbsoluteLayout.AutoSize, 1f));
                 contentLayout.Children.Add(animateFlashBox);
                 animateFlashBox.IsVisible = false;
+
+                //this box absorbs gesture action for elements are included in ViewGesture
+                BoxView boxAbsorbent = new BoxView { BackgroundColor = Color.Transparent };
+                AbsoluteLayout.SetLayoutFlags(boxAbsorbent, AbsoluteLayoutFlags.All);
+                AbsoluteLayout.SetLayoutBounds(boxAbsorbent, new Rectangle(0f, 0f, 1f, 1f));
+                contentLayout.Children.Add(boxAbsorbent);
 
                 base.Content = contentLayout;
             }
@@ -101,57 +106,15 @@ namespace ScnViewGestures.Plugin.Forms
             get { return _animatationScale; }
             set { _animatationScale = value; }
         }
+
+        private uint _animatationSpeed = 100;
+        public uint AnimationSpeed
+        {
+            get { return _animatationSpeed; }
+            set { _animatationSpeed = value; }
+        }
         
         private BoxView animateFlashBox;
-
-        void ViewGestures_AnimationTap(object sender, TapEventArgs e)
-        {
-            if (AnimationEffect == AnimationType.atFlashingTap)
-            {
-                animateFlashBox.TranslationX = e.PositionX - _mainContent.Width / 2;
-                animateFlashBox.IsVisible = true;
-
-                animateFlashBox.Animate<double>(
-                    "AnimateFlashBox",
-                    (t) => { return t * _mainContent.Width; },
-                    (x) =>
-                    {
-                        animateFlashBox.WidthRequest = x;
-
-                        var delta = _mainContent.Width / 2 - Math.Abs(animateFlashBox.TranslationX) - x / 2;
-                        if (delta < 0)
-                        {
-                            if (animateFlashBox.TranslationX < 0)
-                                animateFlashBox.TranslationX -= delta;
-                            else
-                                animateFlashBox.TranslationX += delta;
-                        }
-                    },
-                    16, 500, Easing.SinOut,
-                    (x, y) =>
-                    {
-                        animateFlashBox.WidthRequest = 1;
-                        animateFlashBox.IsVisible = false;
-                    });
-            }
-            else if (AnimationEffect == AnimationType.atFlashing)
-            {
-                animateFlashBox.TranslationX = 0;
-                animateFlashBox.IsVisible = true;
-
-                animateFlashBox.Animate<double>(
-                    "AnimateFlashBox",
-                    (t) => { return t * _mainContent.Width; },
-                    (x) => { animateFlashBox.WidthRequest = x; },
-                    16, 500, Easing.SinOut,
-                    (x, y) =>
-                    {
-                        animateFlashBox.WidthRequest = 1;
-                        animateFlashBox.IsVisible = false;
-                    });
-            }
-
-        }
         #endregion
 
         #region TagProperty
@@ -166,11 +129,11 @@ namespace ScnViewGestures.Plugin.Forms
         #endregion
 
         #region Main gesture
-        public event EventHandler TouchBegan;
-        public void OnTouchBegan()
+        public event EventHandler<PositionEventArgs> TouchBegan;
+        public void OnTouchBegan(double positionX, double positionY)
         {
-            if (TouchBegan != null) 
-                TouchBegan(Content, EventArgs.Empty);
+            if (TouchBegan != null)
+                TouchBegan(Content, new PositionEventArgs(positionX, positionY));
         }
 
         public event EventHandler Touch;
@@ -192,8 +155,8 @@ namespace ScnViewGestures.Plugin.Forms
         static object tapLocker = new object();
         private bool _isTaped = false;
 
-        private EventHandler<TapEventArgs> _tap;
-        public event EventHandler<TapEventArgs> Tap
+        private EventHandler<PositionEventArgs> _tap;
+        public event EventHandler<PositionEventArgs> Tap
         {
             add
             {
@@ -216,7 +179,7 @@ namespace ScnViewGestures.Plugin.Forms
                     _isTaped = true;
 
                     if (_tap != null)
-                        _tap(Content, new TapEventArgs(positionX, positionY));
+                        _tap(Content, new PositionEventArgs(positionX, positionY));
                     OnTouch(GestureType.gtTap);
                 }
         }
@@ -376,19 +339,63 @@ namespace ScnViewGestures.Plugin.Forms
         }
         #endregion
 
-        async void PressBeganEffect(object sender, EventArgs e)
+        async void PressBeganEffect(object sender, PositionEventArgs e)
         {
             lock (tapLocker)
                 _isTaped = false;
 
             if (AnimationEffect == AnimationType.atScaling)
-                await this.ScaleTo(1 + (AnimationScale / 100), 100, Easing.CubicOut);
+                await this.ScaleTo(1 + (AnimationScale / 100), _animatationSpeed, Easing.CubicOut);
+            else if (AnimationEffect == AnimationType.atFlashingTap && !animateFlashBox.IsVisible)
+            {
+                animateFlashBox.TranslationX = e.PositionX -_mainContent.Width / 2;
+                animateFlashBox.IsVisible = true;
+
+                animateFlashBox.Animate<double>(
+                    "AnimateFlashBox",
+                    (t) => { return t * _mainContent.Width; },
+                    (x) =>
+                    {
+                        animateFlashBox.WidthRequest = x;
+
+                        var delta = _mainContent.Width / 2 - Math.Abs(animateFlashBox.TranslationX) - x / 2;
+                        if (delta < 0)
+                        {
+                            if (animateFlashBox.TranslationX < 0)
+                                animateFlashBox.TranslationX -= delta;
+                            else
+                                animateFlashBox.TranslationX += delta;
+                        }
+                    },
+                    16, _animatationSpeed, Easing.SinOut,
+                    (x, y) =>
+                    {
+                        animateFlashBox.WidthRequest = 1;
+                        animateFlashBox.IsVisible = false;
+                    });
+            }
+            else if (AnimationEffect == AnimationType.atFlashing && !animateFlashBox.IsVisible)
+            {
+                animateFlashBox.TranslationX = 0;
+                animateFlashBox.IsVisible = true;
+
+                animateFlashBox.Animate<double>(
+                    "AnimateFlashBox",
+                    (t) => { return t * _mainContent.Width; },
+                    (x) => { animateFlashBox.WidthRequest = x; },
+                    16, _animatationSpeed, Easing.SinOut,
+                    (x, y) =>
+                    {
+                        animateFlashBox.WidthRequest = 1;
+                        animateFlashBox.IsVisible = false;
+                    });
+            }
         }
 
         async void PressEndedEffect(object sender, EventArgs e)
         {
             if (AnimationEffect == AnimationType.atScaling)
-                await this.ScaleTo(1, 100, Easing.CubicOut);
+                await this.ScaleTo(1, _animatationSpeed, Easing.CubicOut);
         }
 
         async void PressEndedEffectWithDelay(object sender, EventArgs e)
@@ -414,12 +421,12 @@ namespace ScnViewGestures.Plugin.Forms
         }
     }
 
-    public class TapEventArgs : EventArgs
+    public class PositionEventArgs : EventArgs
     {
         public readonly double PositionX;
         public readonly double PositionY;
 
-        public TapEventArgs(double positionX, double positionY)
+        public PositionEventArgs(double positionX, double positionY)
         {
             PositionX = positionX;
             PositionY = positionY;

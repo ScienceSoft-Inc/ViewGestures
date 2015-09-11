@@ -30,14 +30,14 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
 
             var tapGestureRecognizer = new TapGestureRecognizer()
             {
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
                 OnTap = ((x, y) => viewGesture.OnTap(x, y)),
             };
 
             var longPressGestureRecognizer = new LongPressGestureRecognizer(() => viewGesture.OnLongTap())
             {
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
             
@@ -46,7 +46,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 Direction = UISwipeGestureRecognizerDirection.Left,
 
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
 
@@ -54,7 +54,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 Direction = UISwipeGestureRecognizerDirection.Right,
 
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
 
@@ -62,7 +62,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 Direction = UISwipeGestureRecognizerDirection.Up,
 
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
 
@@ -70,7 +70,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 Direction = UISwipeGestureRecognizerDirection.Down,
 
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
             };
             #endregion
@@ -78,8 +78,8 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             #region DragGestureRecognizer
             var dragGestureRecognizer = new DragGestureRecognizer()
             {
-             
-                OnTouchesBegan = (() => viewGesture.OnTouchBegan()),
+
+                OnTouchesBegan = ((x, y) => viewGesture.OnTouchBegan(x, y)),
                 OnTouchesEnded = (() => viewGesture.OnTouchEnded()),
                 OnDrag = ((x, y) => viewGesture.OnDrag(x, y)),
             };
@@ -138,16 +138,19 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 base.TouchesBegan(touches, evt);
                 UITouch touch = touches.AnyObject as UITouch;
+                
+                double positionX = -1;
+                double positionY = -1;
 
                 if (OnTap != null && touch != null)
                 {
-                    double positionX = (double)touch.PreviousLocationInView(View).X;
-                    double positionY = (double)touch.PreviousLocationInView(View).Y;
+                    positionX = (double)touch.PreviousLocationInView(View).X;
+                    positionY = (double)touch.PreviousLocationInView(View).Y;
                     OnTap(positionX, positionY);
                 }
 
                 if (OnTouchesBegan != null)
-                    OnTouchesBegan();
+                    OnTouchesBegan(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
@@ -175,7 +178,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             }
 
             public Action<double, double> OnTap;
-            public Action OnTouchesBegan;
+            public Action<double, double> OnTouchesBegan;
             public Action OnTouchesEnded;
         }
 
@@ -189,8 +192,19 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 base.TouchesBegan(touches, evt);
 
+                UITouch touch = touches.AnyObject as UITouch;
+
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touch != null)
+                {
+                    positionX = (double)touch.PreviousLocationInView(View).X;
+                    positionY = (double)touch.PreviousLocationInView(View).Y;
+                }
+
                 if (OnTouchesBegan != null)
-                    OnTouchesBegan();
+                    OnTouchesBegan(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
@@ -217,7 +231,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                     OnTouchesEnded();
             }
 
-            public Action OnTouchesBegan;
+            public Action<double, double> OnTouchesBegan;
             public Action OnTouchesEnded;
         }
 
@@ -231,8 +245,19 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 base.TouchesBegan(touches, evt);
 
+                UITouch touch = touches.AnyObject as UITouch;
+
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touch != null)
+                {
+                    positionX = (double)touch.PreviousLocationInView(View).X;
+                    positionY = (double)touch.PreviousLocationInView(View).Y;
+                }
+
                 if (OnTouchesBegan != null)
-                    OnTouchesBegan();
+                    OnTouchesBegan(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
@@ -251,7 +276,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                     OnTouchesEnded();
             }
 
-            public Action OnTouchesBegan;
+            public Action<double, double> OnTouchesBegan;
             public Action OnTouchesEnded;
         }
 
@@ -261,8 +286,19 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 base.TouchesBegan(touches, evt);
 
+                UITouch touch = touches.AnyObject as UITouch;
+
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touch != null)
+                {
+                    positionX = (double)touch.PreviousLocationInView(View).X;
+                    positionY = (double)touch.PreviousLocationInView(View).Y;
+                }
+
                 if (OnTouchesBegan != null)
-                    OnTouchesBegan();
+                    OnTouchesBegan(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
@@ -294,7 +330,7 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
                     OnTouchesEnded();
             }
 
-            public Action OnTouchesBegan;
+            public Action<double, double> OnTouchesBegan;
             public Action OnTouchesEnded;
             public Action<double, double> OnDrag;
         }

@@ -69,14 +69,13 @@ namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
 
         void winControl_ManipulationStarted(object sender, System.Windows.Input.ManipulationStartedEventArgs e)
         {
-            this.Element.OnTouchBegan();
+            this.Element.OnTouchBegan(e.ManipulationOrigin.X, e.ManipulationOrigin.Y);
         }
 
         void winControl_ManipulationCompleted(object sender, System.Windows.Input.ManipulationCompletedEventArgs e)
         {
             this.Element.OnTouchEnded();
         }
-
 
         void winControl_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
