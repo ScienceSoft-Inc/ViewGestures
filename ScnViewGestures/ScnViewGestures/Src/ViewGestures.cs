@@ -126,6 +126,21 @@ namespace ScnViewGestures.Plugin.Forms
             get { return (string)GetValue(TagProperty); }
             set { SetValue(TagProperty, value); }
         }
+
+        public static string GetTagByChild(object sender)
+        {
+            if (sender == null || !(sender is Element))
+                return null;
+
+            var parentElement = (sender as Element).Parent;
+            while (parentElement != null && !(parentElement is ViewGestures) && (parentElement is Element))
+                parentElement = parentElement.Parent;
+            
+            if (parentElement is ViewGestures)
+                return (parentElement as ViewGestures).Tag;
+            else
+                return null;
+        }
         #endregion
 
         #region Main gesture
