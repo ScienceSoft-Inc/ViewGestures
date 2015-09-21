@@ -127,7 +127,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTouchBegan != null)
-                    OnTouchBegan(e.GetX() / 2, e.GetY() / 2);
+                    OnTouchBegan(e.GetX() / (3 - e.XPrecision), e.GetY() / (3 - e.YPrecision));
 
                 return base.OnDown(e);
             }
@@ -139,7 +139,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTouchBegan != null)
-                    OnTouchBegan(e.GetX() / 2, e.GetY() / 2);
+                    OnTouchBegan(e.GetX() / (3 - e.XPrecision), e.GetY() / (3 - e.YPrecision));
 
                 base.OnShowPress(e);
             }
@@ -181,7 +181,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 #endif
 
                 if (OnTap != null)
-                    OnTap(e.GetX() / 2, e.GetY() / 2);
+                    OnTap(e.GetX() / (3 - e.XPrecision), e.GetY() / (3 - e.YPrecision));
 
                 return base.OnSingleTapUp(e);
             }
@@ -214,7 +214,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 if (Math.Abs(diffX) < TAP_THRESHOLD && Math.Abs(diffX) < TAP_THRESHOLD)
                 {
                     if (OnTap != null)
-                        OnTap(e2.GetX() / 2, e2.GetY() / 2);
+                        OnTap(e2.GetX() / (3 - e2.XPrecision), e2.GetY() / (3 - e2.YPrecision));
                 }
                 else
                 if (Math.Abs(diffX) > Math.Abs(diffY))
