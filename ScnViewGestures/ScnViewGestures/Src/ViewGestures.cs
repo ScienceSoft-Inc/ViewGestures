@@ -58,6 +58,7 @@ namespace ScnViewGestures.Plugin.Forms
                 animateFlashBox = new BoxView 
                 { 
                     BackgroundColor = _animationColor,
+					InputTransparent = true
                 };
                 AbsoluteLayout.SetLayoutFlags(animateFlashBox, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional);
                 animateFlashBox.WidthRequest = 1;
@@ -67,7 +68,11 @@ namespace ScnViewGestures.Plugin.Forms
                 animateFlashBox.IsVisible = false;
 
                 //this box absorbs gesture action for elements are included in ViewGesture
-                BoxView boxAbsorbent = new BoxView { BackgroundColor = Color.Transparent };
+                BoxView boxAbsorbent = new BoxView
+                {
+	                BackgroundColor = Color.Transparent,
+					InputTransparent = true
+				};
                 AbsoluteLayout.SetLayoutFlags(boxAbsorbent, AbsoluteLayoutFlags.All);
                 AbsoluteLayout.SetLayoutBounds(boxAbsorbent, new Rectangle(0f, 0f, 1f, 1f));
                 contentLayout.Children.Add(boxAbsorbent);

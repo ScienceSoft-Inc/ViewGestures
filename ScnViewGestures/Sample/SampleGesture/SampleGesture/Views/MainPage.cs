@@ -44,7 +44,8 @@ namespace SampleGesture.Views
                 BackgroundColor = Color.Yellow,
                 WidthRequest = 150,
                 HeightRequest = 150,
-            };
+				InputTransparent = true
+			};
 
             var swipeViewGestures = new ViewGestures
             {
@@ -72,7 +73,8 @@ namespace SampleGesture.Views
                 BackgroundColor = Color.Green,
                 WidthRequest = 100,
                 HeightRequest = 100,
-            };
+				InputTransparent = true
+			};
 
             var dragViewGestures = new ViewGestures
             {
