@@ -1,1 +1,2 @@
 nuget pack ScnViewGestures.nuspec
+Pause

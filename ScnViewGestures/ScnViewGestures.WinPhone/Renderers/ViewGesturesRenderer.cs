@@ -1,124 +1,120 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.WinPhone;
+using System.Windows.Input;
+using System.Windows.Media;
 using ScnViewGestures.Plugin.Forms;
 using ScnViewGestures.Plugin.Forms.WinPhone.Renderers;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.WinPhone;
+using Color = System.Windows.Media.Color;
 
 [assembly: ExportRenderer(typeof(ViewGestures), typeof(ViewGesturesRenderer))]
 
 namespace ScnViewGestures.Plugin.Forms.WinPhone.Renderers
 {
-    public class ViewGesturesRenderer : ViewRenderer<ViewGestures, Canvas>
-    {
-        public static void Init() { }
+	public class ViewGesturesRenderer : ViewRenderer<ViewGestures, Canvas>
+	{
+		readonly double _deltaPercentage = .25;
 
-        protected override void OnElementChanged(ElementChangedEventArgs<ViewGestures> e)
-        {
-            base.OnElementChanged(e);
+		public static void Init() { }
 
-            Canvas winControl;
+		protected override void OnElementChanged(ElementChangedEventArgs<ViewGestures> e)
+		{
+			base.OnElementChanged(e);
 
-            if (this.Control == null)
-            {
-                winControl = new Canvas();
+			Canvas winControl;
 
-                // note that a background is needed for the gestures to fire
-                winControl.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(
-                    (byte)e.NewElement.BackgroundColor.A, 
-                    (byte)e.NewElement.BackgroundColor.R, 
-                    (byte)e.NewElement.BackgroundColor.G, 
-                    (byte)e.NewElement.BackgroundColor.B));
+			if (Control == null)
+			{
+				winControl = new Canvas
+				{
+					// note that a background is needed for the gestures to fire
+					Background = new SolidColorBrush(Color.FromArgb(
+						(byte) e.NewElement.BackgroundColor.A,
+						(byte) e.NewElement.BackgroundColor.R,
+						(byte) e.NewElement.BackgroundColor.G,
+						(byte) e.NewElement.BackgroundColor.B))
+				};
 
-                // the content view can have 1 child - move it under our Canvas element
-                if (Children.Count > 0)
-                {
-                    var child = Children[0];
-                    Children.Remove(child);
-                    winControl.Children.Add(child);
-                }
+				// the content view can have 1 child - move it under our Canvas element
+				if (Children.Count > 0)
+				{
+					var child = Children[0];
+					Children.Remove(child);
+					winControl.Children.Add(child);
+				}
 
-                SetNativeControl(winControl);
-            }
-            else
-            {
-                winControl = this.Control;
-            }
+				SetNativeControl(winControl);
+			}
+			else
+			{
+				winControl = Control;
+			}
 
-            if (e.NewElement == null)
-            {
-                winControl.ManipulationStarted -= winControl_ManipulationStarted;
-                winControl.ManipulationDelta -= winControl_ManipulationDelta;
-                winControl.ManipulationCompleted -= winControl_ManipulationCompleted;
-                winControl.Tap -= winControl_Tap;
-            }
+			if (e.NewElement == null)
+			{
+				winControl.ManipulationStarted -= winControl_ManipulationStarted;
+				winControl.ManipulationDelta -= winControl_ManipulationDelta;
+				winControl.ManipulationCompleted -= winControl_ManipulationCompleted;
+				winControl.Tap -= winControl_Tap;
+			}
 
-            if (e.OldElement == null)
-            {
-                // setup listeners
-                winControl.ManipulationStarted +=winControl_ManipulationStarted; 
-                winControl.ManipulationDelta += winControl_ManipulationDelta;
-                winControl.ManipulationCompleted += winControl_ManipulationCompleted;
-                winControl.Tap += winControl_Tap;
-            }
-        }
+			if (e.OldElement == null)
+			{
+				// setup listeners
+				winControl.ManipulationStarted += winControl_ManipulationStarted;
+				winControl.ManipulationDelta += winControl_ManipulationDelta;
+				winControl.ManipulationCompleted += winControl_ManipulationCompleted;
+				winControl.Tap += winControl_Tap;
+			}
+		}
 
-        void winControl_ManipulationStarted(object sender, System.Windows.Input.ManipulationStartedEventArgs e)
-        {
-            this.Element.OnTouchBegan(e.ManipulationOrigin.X, e.ManipulationOrigin.Y);
-        }
+		void winControl_ManipulationStarted(object sender, ManipulationStartedEventArgs e)
+		{
+			Element.OnTouchBegan(e.ManipulationOrigin.X, e.ManipulationOrigin.Y);
+		}
 
-        void winControl_ManipulationCompleted(object sender, System.Windows.Input.ManipulationCompletedEventArgs e)
-        {
-            this.Element.OnTouchEnded();
-        }
+		void winControl_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
+		{
+			Element.OnTouchEnded();
+		}
 
-        void winControl_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            var point = e.GetPosition(sender as Canvas );
-            this.Element.OnTap(point.X, point.Y);
-        }
+		void winControl_Tap(object sender, GestureEventArgs e)
+		{
+			var point = e.GetPosition(sender as Canvas);
+			Element.OnTap(point.X, point.Y);
+		}
 
-        double deltaPercentage = .25;
-        void winControl_ManipulationDelta(object sender, System.Windows.Input.ManipulationDeltaEventArgs e)
-        {
-            // Left to Right:   +X
-            // Right to Left:   -X
-            // Top to Bottom:   +Y
-            // Bottom to Top:   -Y
+		void winControl_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+		{
+			// Left to Right:   +X
+			// Right to Left:   -X
+			// Top to Bottom:   +Y
+			// Bottom to Top:   -Y
 
-            // get the movement both directionally and absolute val
-            var delX = e.CumulativeManipulation.Translation.X;
-            var absX = Math.Abs(delX);
-            var delY = e.CumulativeManipulation.Translation.Y;
-            var absY = Math.Abs(delY);
+			// get the movement both directionally and absolute val
+			var delX = e.CumulativeManipulation.Translation.X;
+			var absX = Math.Abs(delX);
+			var delY = e.CumulativeManipulation.Translation.Y;
+			var absY = Math.Abs(delY);
 
-            // calculate how much change will trigger an action based on the control's size
-            var upDownMinDelta = this.ActualHeight * deltaPercentage;
-            var leftRightMinDelta = this.ActualWidth * deltaPercentage;
+			// calculate how much change will trigger an action based on the control's size
+			var upDownMinDelta = ActualHeight*_deltaPercentage;
+			var leftRightMinDelta = ActualWidth*_deltaPercentage;
+			var isNeedComplete = false;
 
-            if (absX > absY && absX > leftRightMinDelta)
-            {
-                if (delX < 0)
-                    this.Element.OnSwipeLeft();
-                else
-                    this.Element.OnSwipeRight();
-                //e.Complete();
-            }
-            else if (absY > absX && absY > upDownMinDelta)
-            {
-                if (delY < 0)
-                    this.Element.OnSwipeUp();
-                else
-                    this.Element.OnSwipeDown();
-                //e.Complete();
-            }
+			if (absX > absY && absX > leftRightMinDelta)
+			{
+				isNeedComplete = delX < 0 ? Element.OnSwipeLeft() : Element.OnSwipeRight();
+			}
+			else if (absY > absX && absY > upDownMinDelta)
+			{
+				isNeedComplete = delY < 0 ? Element.OnSwipeUp() : Element.OnSwipeDown();
+			}
 
-            this.Element.OnDrag((float)e.DeltaManipulation.Translation.X, (float)e.DeltaManipulation.Translation.Y);
-        }
-    }
+			if (isNeedComplete) e.Complete();
+
+			Element.OnDrag((float) e.DeltaManipulation.Translation.X, (float) e.DeltaManipulation.Translation.Y);
+		}
+	}
 }

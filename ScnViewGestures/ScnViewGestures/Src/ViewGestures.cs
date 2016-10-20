@@ -245,18 +245,20 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtSwipeLeft;
             }
         }
-        public void OnSwipeLeft()
-        {
-            if (_swipeLeft != null)
-            {
-                _swipeLeft(Content, EventArgs.Empty);
-                OnTouch(GestureType.gtSwipeLeft);
-            }
-            else
-                OnTouch(GestureType.gtSwipe);
-        }
 
-        private EventHandler _swipeRight;
+	    public bool OnSwipeLeft()
+	    {
+		    if (_swipeLeft != null)
+		    {
+			    _swipeLeft(Content, EventArgs.Empty);
+			    OnTouch(GestureType.gtSwipeLeft);
+			    return true;
+		    }
+		    OnTouch(GestureType.gtSwipe);
+		    return false;
+	    }
+
+	    private EventHandler _swipeRight;
         public event EventHandler SwipeRight
         {
             add
@@ -271,18 +273,20 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtSwipeRight;
             }
         }
-        public void OnSwipeRight()
-        {
-            if (_swipeRight != null)
-            {
-                _swipeRight(Content, EventArgs.Empty);
-                OnTouch(GestureType.gtSwipeRight);
-            }
-            else
-                OnTouch(GestureType.gtSwipe);
-        }
 
-        private EventHandler _swipeUp;
+	    public bool OnSwipeRight()
+	    {
+		    if (_swipeRight != null)
+		    {
+			    _swipeRight(Content, EventArgs.Empty);
+			    OnTouch(GestureType.gtSwipeRight);
+			    return true;
+		    }
+		    OnTouch(GestureType.gtSwipe);
+		    return false;
+	    }
+
+	    private EventHandler _swipeUp;
         public event EventHandler SwipeUp
         {
             add
@@ -297,18 +301,20 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtSwipeUp;
             }
         }
-        public void OnSwipeUp()
-        {
-            if (_swipeUp != null)
-            {
-                _swipeUp(Content, EventArgs.Empty);
-                OnTouch(GestureType.gtSwipeUp);
-            }
-            else
-                OnTouch(GestureType.gtSwipe);
-        }
 
-        private EventHandler _swipeDown;
+	    public bool OnSwipeUp()
+	    {
+		    if (_swipeUp != null)
+		    {
+			    _swipeUp(Content, EventArgs.Empty);
+			    OnTouch(GestureType.gtSwipeUp);
+			    return true;
+		    }
+		    OnTouch(GestureType.gtSwipe);
+		    return false;
+	    }
+
+	    private EventHandler _swipeDown;
         public event EventHandler SwipeDown
         {
             add
@@ -323,17 +329,20 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtSwipeDown;
             }
         }
-        public void OnSwipeDown()
-        {
-            if (_swipeDown != null)
-            {
-                _swipeDown(Content, EventArgs.Empty);
-                OnTouch(GestureType.gtSwipeDown);
-            }
-            else
-                OnTouch(GestureType.gtSwipe);
-        }
-        #endregion
+
+	    public bool OnSwipeDown()
+	    {
+		    if (_swipeDown != null)
+		    {
+			    _swipeDown(Content, EventArgs.Empty);
+			    OnTouch(GestureType.gtSwipeDown);
+			    return true;
+		    }
+		    OnTouch(GestureType.gtSwipe);
+		    return false;
+	    }
+
+	    #endregion
 
         #region Drag
         private EventHandler<DragEventArgs> _drag;
