@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
@@ -8,7 +6,20 @@ namespace ScnViewGestures.Plugin.Forms
 {
     public class ViewGestures : ContentView
     {
-        public ViewGestures()
+		private View _mainContent;
+		private Color _animationColor = Color.Transparent;
+		private BoxView _animateFlashBox;
+		private static readonly object TapLocker = new object();
+		private bool _isTaped;
+		private EventHandler<PositionEventArgs> _tap;
+		private EventHandler<DragEventArgs> _drag;
+		private EventHandler _longTap;
+		private EventHandler _swipeLeft;
+		private EventHandler _swipeRight;
+		private EventHandler _swipeUp;
+		private EventHandler _swipeDown;
+
+		public ViewGestures()
         {
             TouchBegan += PressBeganEffect;
             TouchBegan += PressEndedEffectWithDelay;
@@ -23,7 +34,7 @@ namespace ScnViewGestures.Plugin.Forms
             Content = content;
         }
 
-        [Flags]
+		[Flags]
         public enum GestureType
         {
             gtNone = 0,
@@ -39,40 +50,41 @@ namespace ScnViewGestures.Plugin.Forms
             gtSwipeVertical = gtSwipeUp | gtSwipeDown,
             gtSwipe = gtSwipeHorizontal | gtSwipeVertical,
         };
+
         public GestureType SupportGestures;
 
-        private View _mainContent;
-        public new View Content
+		public new View Content
         {
             get { return base.Content; }
             set 
             {
                 _mainContent = value;
                 
-                AbsoluteLayout contentLayout = new AbsoluteLayout();
+                var contentLayout = new AbsoluteLayout();
 
                 AbsoluteLayout.SetLayoutFlags(value, AbsoluteLayoutFlags.All);
                 AbsoluteLayout.SetLayoutBounds(value, new Rectangle(0f, 0f, 1f, 1f));
                 contentLayout.Children.Add(value);
                 
-                animateFlashBox = new BoxView 
+                _animateFlashBox = new BoxView 
                 { 
                     BackgroundColor = _animationColor,
 					InputTransparent = true
                 };
-                AbsoluteLayout.SetLayoutFlags(animateFlashBox, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional);
-                animateFlashBox.WidthRequest = 1;
-                AbsoluteLayout.SetLayoutBounds(animateFlashBox,
-                    new Rectangle(0.5f, 0f, AbsoluteLayout.AutoSize, 1f));
-                contentLayout.Children.Add(animateFlashBox);
-                animateFlashBox.IsVisible = false;
+
+                AbsoluteLayout.SetLayoutFlags(_animateFlashBox, AbsoluteLayoutFlags.HeightProportional | AbsoluteLayoutFlags.XProportional);
+                _animateFlashBox.WidthRequest = 1;
+                AbsoluteLayout.SetLayoutBounds(_animateFlashBox, new Rectangle(0.5f, 0f, AbsoluteLayout.AutoSize, 1f));
+                contentLayout.Children.Add(_animateFlashBox);
+                _animateFlashBox.IsVisible = false;
 
                 //this box absorbs gesture action for elements are included in ViewGesture
-                BoxView boxAbsorbent = new BoxView
+                var boxAbsorbent = new BoxView
                 {
 	                BackgroundColor = Color.Transparent,
 					InputTransparent = true
 				};
+
                 AbsoluteLayout.SetLayoutFlags(boxAbsorbent, AbsoluteLayoutFlags.All);
                 AbsoluteLayout.SetLayoutBounds(boxAbsorbent, new Rectangle(0f, 0f, 1f, 1f));
                 contentLayout.Children.Add(boxAbsorbent);
@@ -82,6 +94,7 @@ namespace ScnViewGestures.Plugin.Forms
         }
 
         #region Animation
+
         public enum AnimationType
         {
             atNone = 0,
@@ -93,40 +106,28 @@ namespace ScnViewGestures.Plugin.Forms
 
         public AnimationType AnimationEffect = AnimationType.atNone;
 
-        private Color _animationColor = Color.Transparent;
         public Color AnimationColor 
         { 
             get { return _animationColor; }
             set
             {
                 _animationColor = value;
-                if (animateFlashBox != null)
-                    animateFlashBox.BackgroundColor = _animationColor;
+                if (_animateFlashBox != null)
+                    _animateFlashBox.BackgroundColor = _animationColor;
             } 
         }
 
-        private double _animatationScale = 0.0;
-        public double AnimationScale
-        {
-            get { return _animatationScale; }
-            set { _animatationScale = value; }
-        }
+	    public double AnimationScale { get; set; } = 0.0;
 
-        private uint _animatationSpeed = 100;
-        public uint AnimationSpeed
-        {
-            get { return _animatationSpeed; }
-            set { _animatationSpeed = value; }
-        }
-        
-        private BoxView animateFlashBox;
-        #endregion
+        public uint AnimationSpeed { get; set; } = 100;
+
+	    #endregion
 
         #region TagProperty
-        public static readonly BindableProperty TagProperty =
-            BindableProperty.Create<ViewGestures, string>(p => p.Tag, "");
 
-        public string Tag
+	    public static readonly BindableProperty TagProperty = BindableProperty.Create("Tag", typeof(string), typeof(ViewGestures));
+
+		public string Tag
         {
             get { return (string)GetValue(TagProperty); }
             set { SetValue(TagProperty, value); }
@@ -134,49 +135,51 @@ namespace ScnViewGestures.Plugin.Forms
 
         public static string GetTagByChild(object sender)
         {
-            if (sender == null || !(sender is Element))
-                return null;
+	        if (!(sender is Element))
+	        {
+		        return null;
+	        }
 
-            var parentElement = (sender as Element).Parent;
-            while (parentElement != null && !(parentElement is ViewGestures) && (parentElement is Element))
-                parentElement = parentElement.Parent;
-            
-            if (parentElement is ViewGestures)
-                return (parentElement as ViewGestures).Tag;
-            else
-                return null;
+	        var parentElement = ((Element) sender).Parent;
+
+	        while (parentElement != null && !(parentElement is ViewGestures))
+	        {
+		        parentElement = parentElement.Parent;
+	        }
+
+	        return (parentElement as ViewGestures)?.Tag;
         }
+
         #endregion
 
         #region Main gesture
+
         public event EventHandler<PositionEventArgs> TouchBegan;
+
         public void OnTouchBegan(double positionX, double positionY)
         {
-            if (TouchBegan != null)
-                TouchBegan(Content, new PositionEventArgs(positionX, positionY));
+	        TouchBegan?.Invoke(Content, new PositionEventArgs(positionX, positionY));
         }
 
         public event EventHandler Touch;
+
         public void OnTouch(GestureType gestureType)
         {
-            if (Touch != null) 
-                Touch(Content, EventArgs.Empty);
-        }
+			Touch?.Invoke(Content, EventArgs.Empty);
+		}
 
         public event EventHandler TouchEnded;
+
         public void OnTouchEnded()
         {
-            if (TouchEnded != null) 
-                TouchEnded(Content, EventArgs.Empty);
-        }
+			TouchEnded?.Invoke(Content, EventArgs.Empty);
+		}
+
         #endregion
 
         #region Tap gesture
-        static object tapLocker = new object();
-        private bool _isTaped = false;
 
-        private EventHandler<PositionEventArgs> _tap;
-        public event EventHandler<PositionEventArgs> Tap
+		public event EventHandler<PositionEventArgs> Tap
         {
             add
             {
@@ -193,20 +196,20 @@ namespace ScnViewGestures.Plugin.Forms
 
         public void OnTap(double positionX, double positionY)
         {
-            lock (tapLocker) 
+            lock (TapLocker) 
                 if (!_isTaped)
                 {
                     _isTaped = true;
 
-                    if (_tap != null)
-                        _tap(Content, new PositionEventArgs(positionX, positionY));
-                    OnTouch(GestureType.gtTap);
+	                _tap?.Invoke(Content, new PositionEventArgs(positionX, positionY));
+	                OnTouch(GestureType.gtTap);
                 }
         }
+
         #endregion
 
         #region LongTap gesture
-        private EventHandler _longTap;
+
         public event EventHandler LongTap
         {
             add
@@ -221,18 +224,19 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtLongTap;
             }
         }
+
         public void OnLongTap()
         {
-            if (_longTap != null)
-                _longTap(Content, EventArgs.Empty);
-            OnTouch(GestureType.gtLongTap);
+	        _longTap?.Invoke(Content, EventArgs.Empty);
+	        OnTouch(GestureType.gtLongTap);
         }
+
         #endregion
 
         #region Swipe gesture
-        private EventHandler _swipeLeft;
+
         public event EventHandler SwipeLeft
-        {
+		{
             add
             {
                 _swipeLeft += value;
@@ -254,11 +258,11 @@ namespace ScnViewGestures.Plugin.Forms
 			    OnTouch(GestureType.gtSwipeLeft);
 			    return true;
 		    }
+
 		    OnTouch(GestureType.gtSwipe);
 		    return false;
 	    }
 
-	    private EventHandler _swipeRight;
         public event EventHandler SwipeRight
         {
             add
@@ -282,11 +286,11 @@ namespace ScnViewGestures.Plugin.Forms
 			    OnTouch(GestureType.gtSwipeRight);
 			    return true;
 		    }
+
 		    OnTouch(GestureType.gtSwipe);
 		    return false;
 	    }
 
-	    private EventHandler _swipeUp;
         public event EventHandler SwipeUp
         {
             add
@@ -310,11 +314,11 @@ namespace ScnViewGestures.Plugin.Forms
 			    OnTouch(GestureType.gtSwipeUp);
 			    return true;
 		    }
+
 		    OnTouch(GestureType.gtSwipe);
 		    return false;
 	    }
 
-	    private EventHandler _swipeDown;
         public event EventHandler SwipeDown
         {
             add
@@ -338,6 +342,7 @@ namespace ScnViewGestures.Plugin.Forms
 			    OnTouch(GestureType.gtSwipeDown);
 			    return true;
 		    }
+
 		    OnTouch(GestureType.gtSwipe);
 		    return false;
 	    }
@@ -345,7 +350,7 @@ namespace ScnViewGestures.Plugin.Forms
 	    #endregion
 
         #region Drag
-        private EventHandler<DragEventArgs> _drag;
+
         public event EventHandler<DragEventArgs> Drag
         {
             add
@@ -360,74 +365,78 @@ namespace ScnViewGestures.Plugin.Forms
                     SupportGestures ^= GestureType.gtDrag;
             }
         }
+
         public void OnDrag(double distanceX, double distanceY)
         {
-            if (_drag != null)
-                _drag(Content, new DragEventArgs(distanceX, distanceY));
-            OnTouch(GestureType.gtDrag);
+	        _drag?.Invoke(Content, new DragEventArgs(distanceX, distanceY));
+
+	        OnTouch(GestureType.gtDrag);
         }
+
         #endregion
 
-        async void PressBeganEffect(object sender, PositionEventArgs e)
+	    private async void PressBeganEffect(object sender, PositionEventArgs e)
+	    {
+		    lock (TapLocker)
+			    _isTaped = false;
+
+		    if (AnimationEffect == AnimationType.atScaling)
+		    {
+			    await this.ScaleTo(1 + (AnimationScale/100), AnimationSpeed, Easing.CubicOut);
+		    }
+		    else if (AnimationEffect == AnimationType.atFlashingTap && !_animateFlashBox.IsVisible)
+		    {
+			    _animateFlashBox.TranslationX = e.PositionX - _mainContent.Width/2;
+			    _animateFlashBox.IsVisible = true;
+			    _animateFlashBox.Animate(
+				    "AnimateFlashBox",
+				    (t) => t*_mainContent.Width,
+				    (x) =>
+				    {
+					    _animateFlashBox.WidthRequest = x;
+
+					    var delta = _mainContent.Width/2 - Math.Abs(_animateFlashBox.TranslationX) - x/2;
+					    if (delta < 0)
+					    {
+						    if (_animateFlashBox.TranslationX < 0)
+							    _animateFlashBox.TranslationX -= delta;
+						    else
+							    _animateFlashBox.TranslationX += delta;
+					    }
+				    },
+				    16, AnimationSpeed, Easing.SinOut,
+				    (x, y) =>
+				    {
+					    _animateFlashBox.WidthRequest = 1;
+					    _animateFlashBox.IsVisible = false;
+				    });
+		    }
+		    else if (AnimationEffect == AnimationType.atFlashing && !_animateFlashBox.IsVisible)
+		    {
+			    _animateFlashBox.TranslationX = 0;
+			    _animateFlashBox.IsVisible = true;
+			    _animateFlashBox.Animate(
+				    "AnimateFlashBox",
+				    (t) => t*_mainContent.Width,
+				    (x) => { _animateFlashBox.WidthRequest = x; },
+				    16, AnimationSpeed, Easing.SinOut,
+				    (x, y) =>
+				    {
+					    _animateFlashBox.WidthRequest = 1;
+					    _animateFlashBox.IsVisible = false;
+				    });
+		    }
+	    }
+
+	    private async void PressEndedEffect(object sender, EventArgs e)
         {
-            lock (tapLocker)
-                _isTaped = false;
-
-            if (AnimationEffect == AnimationType.atScaling)
-                await this.ScaleTo(1 + (AnimationScale / 100), _animatationSpeed, Easing.CubicOut);
-            else if (AnimationEffect == AnimationType.atFlashingTap && !animateFlashBox.IsVisible)
-            {
-                animateFlashBox.TranslationX = e.PositionX -_mainContent.Width / 2;
-                animateFlashBox.IsVisible = true;
-
-                animateFlashBox.Animate<double>(
-                    "AnimateFlashBox",
-                    (t) => { return t * _mainContent.Width; },
-                    (x) =>
-                    {
-                        animateFlashBox.WidthRequest = x;
-
-                        var delta = _mainContent.Width / 2 - Math.Abs(animateFlashBox.TranslationX) - x / 2;
-                        if (delta < 0)
-                        {
-                            if (animateFlashBox.TranslationX < 0)
-                                animateFlashBox.TranslationX -= delta;
-                            else
-                                animateFlashBox.TranslationX += delta;
-                        }
-                    },
-                    16, _animatationSpeed, Easing.SinOut,
-                    (x, y) =>
-                    {
-                        animateFlashBox.WidthRequest = 1;
-                        animateFlashBox.IsVisible = false;
-                    });
-            }
-            else if (AnimationEffect == AnimationType.atFlashing && !animateFlashBox.IsVisible)
-            {
-                animateFlashBox.TranslationX = 0;
-                animateFlashBox.IsVisible = true;
-
-                animateFlashBox.Animate<double>(
-                    "AnimateFlashBox",
-                    (t) => { return t * _mainContent.Width; },
-                    (x) => { animateFlashBox.WidthRequest = x; },
-                    16, _animatationSpeed, Easing.SinOut,
-                    (x, y) =>
-                    {
-                        animateFlashBox.WidthRequest = 1;
-                        animateFlashBox.IsVisible = false;
-                    });
-            }
+	        if (AnimationEffect == AnimationType.atScaling)
+	        {
+		        await this.ScaleTo(1, AnimationSpeed, Easing.CubicOut);
+	        }
         }
 
-        async void PressEndedEffect(object sender, EventArgs e)
-        {
-            if (AnimationEffect == AnimationType.atScaling)
-                await this.ScaleTo(1, _animatationSpeed, Easing.CubicOut);
-        }
-
-        async void PressEndedEffectWithDelay(object sender, EventArgs e)
+	    private async void PressEndedEffectWithDelay(object sender, EventArgs e)
         {
             if (_drag != null)
                 return;
