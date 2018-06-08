@@ -1,19 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
 using Android.Views;
-using Android.Widget;
-using Xamarin.Forms.Platform.Android;
-using Xamarin.Forms;
 using ScnViewGestures.Plugin.Forms;
 using ScnViewGestures.Plugin.Forms.Droid.Renderers;
+using System;
 using System.Timers;
+using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 
 [assembly: ExportRenderer(typeof(ViewGestures), typeof(ViewGesturesRenderer))]
 
@@ -22,7 +13,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
     public class ViewGesturesRenderer : ViewRenderer
     {
         // Used for registration with dependency service
-        public async static void Init()
+        public static async void Init()
         {
             var temp = DateTime.Now;
         }
@@ -40,12 +31,12 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
         {
             base.OnElementChanged(e);
 
-            var viewGestures = (ViewGestures)Element;
+            var viewGestures = (ViewGestures) e.NewElement;
 
             if (e.NewElement == null)
             {
-                this.GenericMotion -= HandleGenericMotion;
-                this.Touch -= HandleTouch;
+                GenericMotion -= HandleGenericMotion;
+                Touch -= HandleTouch;
 
                 _listener.OnTap = null;
                 _listener.OnTouchBegan = null;
@@ -60,21 +51,21 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
 
             if (e.OldElement == null)
             {
-                this.GenericMotion += HandleGenericMotion;
-                this.Touch += HandleTouch;
+                GenericMotion += HandleGenericMotion;
+                Touch += HandleTouch;
 
-                _listener.OnTap = ((x, y) => viewGestures.OnTap(x,y));
-                _listener.OnLongTap = (() => viewGestures.OnLongTap());
+                _listener.OnTap = (x, y) => viewGestures.OnTap(x,y);
+                _listener.OnLongTap = () => viewGestures.OnLongTap();
 
-                _listener.OnTouchBegan = ((x, y) => viewGestures.OnTouchBegan(x, y));
-                _listener.OnTouchEnded = (() => viewGestures.OnTouchEnded());
+                _listener.OnTouchBegan = (x, y) => viewGestures.OnTouchBegan(x, y);
+                _listener.OnTouchEnded = () => viewGestures.OnTouchEnded();
 
-                _listener.OnSwipeLeft = (() => viewGestures.OnSwipeLeft());
-                _listener.OnSwipeRight = (() => viewGestures.OnSwipeRight());
-                _listener.OnSwipeUp = (() => viewGestures.OnSwipeUp());
-                _listener.OnSwipeDown = (() => viewGestures.OnSwipeDown());
+                _listener.OnSwipeLeft = () => viewGestures.OnSwipeLeft();
+                _listener.OnSwipeRight = () => viewGestures.OnSwipeRight();
+                _listener.OnSwipeUp = () => viewGestures.OnSwipeUp();
+                _listener.OnSwipeDown = () => viewGestures.OnSwipeDown();
 
-                _listener.OnDrag = ((x, y) => viewGestures.OnDrag(x, y));
+                _listener.OnDrag = (x, y) => viewGestures.OnDrag(x, y);
             }
         }
 
@@ -208,8 +199,8 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 Console.WriteLine("OnFling");
                 #endif
 
-                float diffY = e2.GetY() - e1.GetY();
-                float diffX = e2.GetX() - e1.GetX();
+                var diffY = e2.GetY() - e1.GetY();
+                var diffX = e2.GetX() - e1.GetX();
 
                 if (Math.Abs(diffX) < TAP_THRESHOLD && Math.Abs(diffX) < TAP_THRESHOLD)
                 {
@@ -261,8 +252,8 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
                 Console.WriteLine("OnScroll");
                 #endif
 
-                float diffX = e2.GetX() - e1.GetX();
-                float diffY = e2.GetY() - e1.GetY();
+                var diffX = e2.GetX() - e1.GetX();
+                var diffY = e2.GetY() - e1.GetY();
 
                 if (OnDrag != null)
                 {

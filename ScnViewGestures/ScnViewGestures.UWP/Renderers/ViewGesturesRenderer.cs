@@ -1,16 +1,16 @@
-﻿using System;
+﻿using ScnViewGestures.Plugin.Forms;
+using ScnViewGestures.UWP.Renderers;
+using System;
 using Windows.UI;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using ScnViewGestures.Plugin.Forms;
-using ScnViewGestures.UWP.Renderers;
 using Xamarin.Forms.Platform.UWP;
 
 [assembly: ExportRenderer(typeof(ViewGestures), typeof(ViewGesturesRenderer))]
 namespace ScnViewGestures.UWP.Renderers
 {
-	public class ViewGesturesRenderer : ViewRenderer<ViewGestures, Canvas>
+    public class ViewGesturesRenderer : ViewRenderer<ViewGestures, Canvas>
 	{
 		private readonly double _deltaPercentage = .25;
 
@@ -22,7 +22,7 @@ namespace ScnViewGestures.UWP.Renderers
 
 			Canvas winControl;
 
-			if (this.Control == null)
+			if (Control == null)
 			{
 				winControl = new Canvas();
 				winControl.ManipulationMode = ManipulationModes.All;
@@ -43,7 +43,7 @@ namespace ScnViewGestures.UWP.Renderers
 			}
 			else
 			{
-				winControl = this.Control;
+				winControl = Control;
 			}
 
 			if (e.NewElement == null)
