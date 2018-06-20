@@ -1,2 +1,0 @@
-nuget push *.nupkg
-PAUSE
