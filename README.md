@@ -1,6 +1,6 @@
 ScnViewGestures
 ======================
-Xamarin.Forms gestures plugin for view controls (targeted at Android, iOS and Windows Phone).
+Xamarin.Forms gestures plugin for view controls (targeted at Android & iOS).
 
 Description
 ===========================================
@@ -35,10 +35,5 @@ ViewGesturesRenderer.Init();
 Android:
 ```cs
 Xamarin.Forms.Forms.Init (this, bundle);
-ViewGesturesRenderer.Init();
-```
-WinPhone:
-```cs
-Xamarin.Forms.Forms.Init ();
 ViewGesturesRenderer.Init();
 ```
