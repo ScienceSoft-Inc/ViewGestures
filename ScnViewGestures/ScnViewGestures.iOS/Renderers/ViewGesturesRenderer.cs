@@ -12,10 +12,8 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
 {
     public class ViewGesturesRenderer : ViewRenderer
     {
-        // Used for registration with dependency service
-        public static async void Init()
+        public new static void Init()
         {
-            var temp = DateTime.Now;
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<View> e)
@@ -27,56 +25,54 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             var tapGestureRecognizer = new TapGestureRecognizer
             {
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded(),
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y),
                 OnTap = (x, y) => viewGesture.OnTap(x, y)
             };
 
             var longPressGestureRecognizer = new LongPressGestureRecognizer(() => viewGesture.OnLongTap())
             {
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded()
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y)
             };
-            
+
             #region SwipeGestureRecognizer
+
             var swipeLeftGestureRecognizer = new SwipeGestureRecognizer(() => viewGesture.OnSwipeLeft())
             {
                 Direction = UISwipeGestureRecognizerDirection.Left,
-
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded()
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y)
             };
 
             var swipeRightGestureRecognizer = new SwipeGestureRecognizer(() => viewGesture.OnSwipeRight())
             {
                 Direction = UISwipeGestureRecognizerDirection.Right,
-
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded()
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y)
             };
 
             var swipeUpGestureRecognizer = new SwipeGestureRecognizer(() => viewGesture.OnSwipeUp())
             {
                 Direction = UISwipeGestureRecognizerDirection.Up,
-
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded()
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y)
             };
 
             var swipeDownGestureRecognizer = new SwipeGestureRecognizer(() => viewGesture.OnSwipeDown())
             {
                 Direction = UISwipeGestureRecognizerDirection.Down,
-
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded()
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y)
             };
+
             #endregion
 
             #region DragGestureRecognizer
+
             var dragGestureRecognizer = new DragGestureRecognizer
             {
-
                 OnTouchesBegan = (x, y) => viewGesture.OnTouchBegan(x, y),
-                OnTouchesEnded = () => viewGesture.OnTouchEnded(),
+                OnTouchesEnded = (x, y) => viewGesture.OnTouchEnded(x, y),
                 OnDrag = (x, y) => viewGesture.OnDrag(x, y)
             };
 
@@ -98,26 +94,13 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
 
             if (e.NewElement == null)
             {
-                if (tapGestureRecognizer != null)
-                    RemoveGestureRecognizer(tapGestureRecognizer);
-
-                if (longPressGestureRecognizer != null)
-                    RemoveGestureRecognizer(longPressGestureRecognizer);
-
-                if (swipeLeftGestureRecognizer != null)
-                    RemoveGestureRecognizer(swipeLeftGestureRecognizer);
-
-                if (swipeRightGestureRecognizer != null)
-                    RemoveGestureRecognizer(swipeRightGestureRecognizer);
-                
-                if (swipeUpGestureRecognizer != null)
-                    RemoveGestureRecognizer(swipeUpGestureRecognizer);
-                
-                if (swipeDownGestureRecognizer != null)
-                    RemoveGestureRecognizer(swipeDownGestureRecognizer);
-
-                if (dragGestureRecognizer != null)
-                    RemoveGestureRecognizer(dragGestureRecognizer);
+                RemoveGestureRecognizer(tapGestureRecognizer);
+                RemoveGestureRecognizer(longPressGestureRecognizer);
+                RemoveGestureRecognizer(swipeLeftGestureRecognizer);
+                RemoveGestureRecognizer(swipeRightGestureRecognizer);
+                RemoveGestureRecognizer(swipeUpGestureRecognizer);
+                RemoveGestureRecognizer(swipeDownGestureRecognizer);
+                RemoveGestureRecognizer(dragGestureRecognizer);
             }
 
             if (e.OldElement == null)
@@ -132,193 +115,196 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             }
         }
 
-        class TapGestureRecognizer : UITapGestureRecognizer
+        private class TapGestureRecognizer : UITapGestureRecognizer
         {
             public override void TouchesBegan(NSSet touches, UIEvent evt)
             {
                 base.TouchesBegan(touches, evt);
-                var touch = touches.AnyObject as UITouch;
-                
+
                 double positionX = -1;
                 double positionY = -1;
 
-                if (OnTap != null && touch != null)
+                if (touches.AnyObject is UITouch touch)
                 {
-                    positionX = touch.PreviousLocationInView(View).X;
-                    positionY = touch.PreviousLocationInView(View).Y;
-                    OnTap(positionX, positionY);
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
                 }
 
-                if (OnTouchesBegan != null)
-                    OnTouchesBegan(positionX, positionY);
+                OnTouchesBegan?.Invoke(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
             {
                 base.TouchesEnded(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                double positionX = -1;
+                double positionY = -1;
+
+                if (OnTap != null && touches.AnyObject is UITouch touch)
+                {
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
+                    OnTap(positionX, positionY);
+                }
+
+                OnTouchesEnded?.Invoke(positionX, positionY);
             }
-
-            /*public override void TouchesMoved(NSSet touches, UIEvent evt)
-            {
-                base.TouchesMoved(touches, evt);
-
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
-            }*/
 
             public override void TouchesCancelled(NSSet touches, UIEvent evt)
             {
                 base.TouchesCancelled(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                OnTouchesEnded?.Invoke(-1, -1);
             }
 
             public Action<double, double> OnTap;
             public Action<double, double> OnTouchesBegan;
-            public Action OnTouchesEnded;
+            public Action<double, double> OnTouchesEnded;
         }
 
-        class LongPressGestureRecognizer : UILongPressGestureRecognizer
+        private class LongPressGestureRecognizer : UILongPressGestureRecognizer
         {
             public LongPressGestureRecognizer(Action action)
                 : base(action)
-            { }
+            {
+            }
 
             public override void TouchesBegan(NSSet touches, UIEvent evt)
             {
                 base.TouchesBegan(touches, evt);
 
-                var touch = touches.AnyObject as UITouch;
-
                 double positionX = -1;
                 double positionY = -1;
 
-                if (touch != null)
+                if (touches.AnyObject is UITouch touch)
                 {
-                    positionX = touch.PreviousLocationInView(View).X;
-                    positionY = touch.PreviousLocationInView(View).Y;
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
                 }
 
-                if (OnTouchesBegan != null)
-                    OnTouchesBegan(positionX, positionY);
+                OnTouchesBegan?.Invoke(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
             {
                 base.TouchesEnded(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touches.AnyObject is UITouch touch)
+                {
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
+                }
+
+                OnTouchesEnded?.Invoke(positionX, positionY);
             }
-
-            /*public override void TouchesMoved(NSSet touches, UIEvent evt)
-            {
-                base.TouchesMoved(touches, evt);
-
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
-            }*/
 
             public override void TouchesCancelled(NSSet touches, UIEvent evt)
             {
                 base.TouchesCancelled(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                OnTouchesEnded?.Invoke(-1, -1);
             }
 
             public Action<double, double> OnTouchesBegan;
-            public Action OnTouchesEnded;
+            public Action<double, double> OnTouchesEnded;
         }
 
-        class SwipeGestureRecognizer : UISwipeGestureRecognizer
+        private class SwipeGestureRecognizer : UISwipeGestureRecognizer
         {
             public SwipeGestureRecognizer(Action action)
                 : base(action)
-            { }
+            {
+            }
 
             public override void TouchesBegan(NSSet touches, UIEvent evt)
             {
                 base.TouchesBegan(touches, evt);
 
-                var touch = touches.AnyObject as UITouch;
-
                 double positionX = -1;
                 double positionY = -1;
 
-                if (touch != null)
+                if (touches.AnyObject is UITouch touch)
                 {
-                    positionX = touch.PreviousLocationInView(View).X;
-                    positionY = touch.PreviousLocationInView(View).Y;
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
                 }
 
-                if (OnTouchesBegan != null)
-                    OnTouchesBegan(positionX, positionY);
+                OnTouchesBegan?.Invoke(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
             {
                 base.TouchesEnded(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touches.AnyObject is UITouch touch)
+                {
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
+                }
+
+                OnTouchesEnded?.Invoke(positionX, positionY);
             }
 
             public override void TouchesCancelled(NSSet touches, UIEvent evt)
             {
                 base.TouchesCancelled(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                OnTouchesEnded?.Invoke(-1, -1);
             }
 
             public Action<double, double> OnTouchesBegan;
-            public Action OnTouchesEnded;
+            public Action<double, double> OnTouchesEnded;
         }
 
-        class DragGestureRecognizer : UIPanGestureRecognizer
+        private class DragGestureRecognizer : UIPanGestureRecognizer
         {
             public override void TouchesBegan(NSSet touches, UIEvent evt)
             {
                 base.TouchesBegan(touches, evt);
 
-                var touch = touches.AnyObject as UITouch;
-
                 double positionX = -1;
                 double positionY = -1;
 
-                if (touch != null)
+                if (touches.AnyObject is UITouch touch)
                 {
-                    positionX = touch.PreviousLocationInView(View).X;
-                    positionY = touch.PreviousLocationInView(View).Y;
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
                 }
 
-                if (OnTouchesBegan != null)
-                    OnTouchesBegan(positionX, positionY);
+                OnTouchesBegan?.Invoke(positionX, positionY);
             }
 
             public override void TouchesEnded(NSSet touches, UIEvent evt)
             {
                 base.TouchesEnded(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                double positionX = -1;
+                double positionY = -1;
+
+                if (touches.AnyObject is UITouch touch)
+                {
+                    positionX = touch.LocationInView(View).X;
+                    positionY = touch.LocationInView(View).Y;
+                }
+
+                OnTouchesEnded?.Invoke(positionX, positionY);
             }
 
             public override void TouchesMoved(NSSet touches, UIEvent evt)
             {
                 base.TouchesMoved(touches, evt);
-                var touch = touches.AnyObject as UITouch;
 
-                if (OnDrag != null && touch != null) 
+                if (OnDrag != null && touches.AnyObject is UITouch touch)
                 {
-                    var offsetX = touch.PreviousLocationInView(View).X - (double)touch.LocationInView(View).X;
-                    var offsetY = touch.PreviousLocationInView(View).Y - (double)touch.LocationInView(View).Y;
-                    OnDrag (-offsetX, -offsetY);
+                    var offsetX = touch.PreviousLocationInView(View).X - (double) touch.LocationInView(View).X;
+                    var offsetY = touch.PreviousLocationInView(View).Y - (double) touch.LocationInView(View).Y;
+                    OnDrag(-offsetX, -offsetY);
                 }
             }
 
@@ -326,12 +312,11 @@ namespace ScnViewGestures.Plugin.Forms.iOS.Renderers
             {
                 base.TouchesCancelled(touches, evt);
 
-                if (OnTouchesEnded != null)
-                    OnTouchesEnded();
+                OnTouchesEnded?.Invoke(-1, -1);
             }
 
             public Action<double, double> OnTouchesBegan;
-            public Action OnTouchesEnded;
+            public Action<double, double> OnTouchesEnded;
             public Action<double, double> OnDrag;
         }
     }

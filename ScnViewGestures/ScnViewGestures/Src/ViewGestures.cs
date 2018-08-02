@@ -48,7 +48,7 @@ namespace ScnViewGestures.Plugin.Forms
 
             gtSwipeHorizontal = gtSwipeLeft | gtSwipeRight,
             gtSwipeVertical = gtSwipeUp | gtSwipeDown,
-            gtSwipe = gtSwipeHorizontal | gtSwipeVertical,
+            gtSwipe = gtSwipeHorizontal | gtSwipeVertical
         };
 
         public GestureType SupportGestures;
@@ -168,12 +168,12 @@ namespace ScnViewGestures.Plugin.Forms
 			Touch?.Invoke(Content, EventArgs.Empty);
 		}
 
-        public event EventHandler TouchEnded;
+        public event EventHandler<PositionEventArgs> TouchEnded;
 
-        public void OnTouchEnded()
+        public void OnTouchEnded(double positionX, double positionY)
         {
-			TouchEnded?.Invoke(Content, EventArgs.Empty);
-		}
+			TouchEnded?.Invoke(Content, new PositionEventArgs(positionX, positionY));
+        }
 
         #endregion
 
@@ -390,8 +390,8 @@ namespace ScnViewGestures.Plugin.Forms
 			    _animateFlashBox.IsVisible = true;
 			    _animateFlashBox.Animate(
 				    "AnimateFlashBox",
-				    (t) => t*_mainContent.Width,
-				    (x) =>
+				    t => t*_mainContent.Width,
+				    x =>
 				    {
 					    _animateFlashBox.WidthRequest = x;
 
@@ -417,8 +417,8 @@ namespace ScnViewGestures.Plugin.Forms
 			    _animateFlashBox.IsVisible = true;
 			    _animateFlashBox.Animate(
 				    "AnimateFlashBox",
-				    (t) => t*_mainContent.Width,
-				    (x) => { _animateFlashBox.WidthRequest = x; },
+				    t => t*_mainContent.Width,
+				    x => _animateFlashBox.WidthRequest = x,
 				    16, AnimationSpeed, Easing.SinOut,
 				    (x, y) =>
 				    {
@@ -430,10 +430,8 @@ namespace ScnViewGestures.Plugin.Forms
 
 	    private async void PressEndedEffect(object sender, EventArgs e)
         {
-	        if (AnimationEffect == AnimationType.atScaling)
-	        {
-		        await this.ScaleTo(1, AnimationSpeed, Easing.CubicOut);
-	        }
+            if (AnimationEffect == AnimationType.atScaling)
+                await this.ScaleTo(1, AnimationSpeed, Easing.CubicOut);
         }
 
 	    private async void PressEndedEffectWithDelay(object sender, EventArgs e)
@@ -443,7 +441,7 @@ namespace ScnViewGestures.Plugin.Forms
 
             //OnTouchEnded isn't called if view is included in scroll panel
             await Task.Delay(2000);
-            OnTouchEnded();
+            OnTouchEnded(-1, -1);
         }
     }
 
