@@ -24,7 +24,7 @@ namespace ScnViewGestures.Plugin.Forms.Droid.Renderers
             : base(context)
         {
             _listener = new GestureListener();
-            _detector = new GestureDetector(_listener);
+            _detector = new GestureDetector(context, _listener);
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Xamarin.Forms.View> e)
