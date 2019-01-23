@@ -1,9 +1,9 @@
-﻿using Xamarin.Forms;
-using ScnViewGestures.Plugin.Forms;
+﻿using ScnViewGestures.Plugin.Forms;
+using Xamarin.Forms;
 
 namespace SampleGesture.Views
 {
-	public class MainPage : ContentPage
+    public class MainPage : ContentPage
 	{
 		public MainPage()
 		{
@@ -101,7 +101,7 @@ namespace SampleGesture.Views
 
             Content = new StackLayout
 			{
-				Padding = new Thickness(20),
+				Padding = 20,
 				Spacing = 20,
 				Children =
 				{
